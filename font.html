@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+		.list {
+			display: flex;
+			width: 200px;
+			border-right: 1px solid #000;
+			border-bottom: 1px solid #000;
+		}
+
+		.bit {
+			width: 50px;
+			height: 50px;
+			box-sizing: border-box;
+			border-left: 1px solid #000;
+			border-top: 1px solid #000;
+		}
+
+		.bit.active {
+			background-color: red;
+		}
+
+		.result {
+			font-size: 20px;
+			line-height: 30px;
+			padding: 20px;
+			margin-top: 10px;
+			font-family: 'Courier New';
+
+		}
+	</style>
+	<!-- <script src="./vue.min.js"></script> -->
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+</head>
+
+<body> 
+	<div id="app">
+		<div class="list">
+			<div v-for='byte in numberOfBytes' class="bytes">
+				<div v-for="bit in bitsPerByte" @mousedown="handleClick(byte - 1, bit - 1)"
+					@mouseover="handleHover(byte - 1, bit - 1)" class="bit"
+					:class="{active: result[(bit -1 ) + (byte -1 ) * bitsPerByte] == 1}">
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<button @click="result =  Array(32).fill(0)">重置</button>
+		</div>
+
+		<textarea class="result" cols="30" rows="4">{{printResult}}</textarea>
+	</div>
+</body>
+
+
+<script>
+	new Vue({
+		el: '#app',
+		data: {
+			numberOfBytes: 4,
+			bitsPerByte: 8,
+			result: Array(32).fill(0),
+			mousedown: false,
+		},
+		created() {
+			window.addEventListener('mousedown', () => {
+				this.mousedown = true
+			})
+			window.addEventListener('mouseup', () => {
+				this.mousedown = false
+			})
+		},
+		computed: {
+			printResult() {
+				const { result, numberOfBytes, bitsPerByte } = this
+
+				let str = ''
+				for (let byte = 0; byte < numberOfBytes; byte++) {
+					for (let bit = 0; bit < bitsPerByte; bit++) {
+						const offset = bit + byte * this.bitsPerByte
+
+						str += result[offset]
+						str += ','
+					}
+					str += '\n'
+				}
+				return str
+			}
+		},
+		methods: {
+			handleClick(byte, bit) {
+				const offset = bit + byte * this.bitsPerByte
+				Vue.set(this.result, offset, (this.result[offset] + 1) % 2)
+			},
+
+			handleHover(byte, bit) {
+				if (this.mousedown) {
+					this.handleClick(byte, bit)
+				}
+			}
+		}
+	})
+</script>
+
+</html>
